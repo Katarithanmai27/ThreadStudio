@@ -1,0 +1,19 @@
+server:
+  port: 8081
+spring:
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/threadstudio?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true}
+    username: ${SPRING_DATASOURCE_USERNAME:root}
+    password: ${SPRING_DATASOURCE_PASSWORD:pttmspttms}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+  jackson:
+    default-property-inclusion: non_null
+app:
+  jwt-secret: ${JWT_SECRET:eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJhZG1pbkBnbWFpbC5jb20iLCJyb2xlIjoiQURNSU4iLCJuYW1lIjoiYWRtaW4iLCJpYXQiOjE3OTA3NDgyODgsImV4cCI6MTc5MDgzNDY4OH0.s7PZoqYItD8lsdeTcBf8B9yUCV6zTp7Cu3bjuUGWBoZPRmBaPA3W8y67LVwvehYX}
+  cors-origins: "http://localhost:5173,http://127.0.0.1:5173"
