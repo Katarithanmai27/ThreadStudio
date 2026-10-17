@@ -1,57 +1,83 @@
-# ThreadStudio — Designer Marketplace
+# ThreadStudio — Fashion Designer Marketplace
 
-A full-stack marketplace where fashion-design students can publish dresses/clothes, build a brand, receive orders, and sell to shoppers.
+ThreadStudio is a full-stack marketplace where fashion design students and emerging designers can showcase clothing designs, build their brands, and sell products to customers.
 
-## Stack
-- Frontend: React + Vite
-- Backend: Java 21, Spring Boot 3, Spring Security, JWT
-- Database: MySQL 8
-- Deployment: Docker Compose (frontend + API + database)
+## Technology Stack
 
-## Roles and main flows
-- **USER**: browse/search products, cart, place an order, view orders, rate products.
-- **DESIGNER**: register as a designer, submit products, edit/delete own products, view orders.
-- **ADMIN**: approve designers, approve products, manage product listings.
-- JWT bearer authentication; role-based API authorization.
+- **Frontend:** React.js, Vite
+- **Backend:** Java 21, Spring Boot 3, Spring Security, JWT
+- **Database:** MySQL 8
+- **Deployment:** Docker Compose
 
-## Quick start (Docker)
-1. Install Docker Desktop / Docker Engine with Compose.
-2. Copy `.env.example` to `.env` and change `JWT_SECRET` to a long random value.
-3. Run `docker compose up --build`.
-4. Open http://localhost:5173
+## User Roles and Key Features
 
-Default database credentials are for local development only. Change them before deploying publicly.
+- **Customer:** Browse and search products, manage a shopping cart, place orders, view order history, and rate products.
+- **Designer:** Register as a designer, submit products, manage their own products, and view orders.
+- **Administrator:** Approve designer registrations, approve products, and manage product listings.
 
-## Local development
+The application uses JWT bearer authentication and role-based API authorization.
+
+## Getting Started with Docker
+
+1. Install Docker Desktop or Docker Engine with Docker Compose.
+2. Copy `.env.example` to `.env`.
+3. Configure the required environment variables and set a strong, unique `JWT_SECRET`.
+4. Start the application:
+
+   ```bash
+   docker compose up --build
+   ```
+
+5. Open [http://localhost:5173](http://localhost:5173) in your browser.
+
+Use secure credentials and appropriate configuration before deploying publicly.
+
+## Local Development
+
 ### Backend
-Requires Java 21 and Maven.
+
+Requirements: Java 21 and Maven.
+
 ```bash
 cd backend
 mvn spring-boot:run
 ```
-Configure `SPRING_DATASOURCE_URL`, `SPRING_DATASOURCE_USERNAME`, `SPRING_DATASOURCE_PASSWORD`, and `JWT_SECRET` as environment variables, or use the local defaults in `application.yml`.
+
+Configure the database connection and JWT secret using environment variables or the application's supported local configuration.
 
 ### Frontend
-Requires Node 20.19+ or 22.12+.
+
+Requirements: A compatible Node.js version.
+
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
-Set `VITE_API_URL=http://localhost:8080/api` if the API is elsewhere.
 
-## First admin
-Register a normal account, then promote it to ADMIN directly in MySQL for the first setup:
+Configure `VITE_API_URL` to point to your backend API if it differs from the project's default.
+
+## Initial Administrator Setup
+
+For the initial local development setup, register an account and promote it to administrator in MySQL using the appropriate table and role values for your application.
+
+Example, if your schema uses these names:
+
 ```sql
-UPDATE users SET role='ADMIN' WHERE email='your-email@example.com';
+UPDATE users
+SET role = 'ADMIN'
+WHERE email = 'your-email@example.com';
 ```
-Restart/login again to receive an ADMIN token.
 
-## Important production checklist
-- Set strong unique DB credentials and `JWT_SECRET` (32+ random bytes).
-- Use HTTPS and a managed MySQL instance or private database network.
-- Configure CORS to your deployed frontend origin.
-- Add email verification/password reset, rate limiting, audit logs, backups, and monitoring.
-- This starter uses a **cash-on-delivery/demo order checkout**. It does not collect card details or integrate a payment gateway. Integrate Razorpay/Stripe server-side before offering online payments.
-- Product image URLs are stored as URLs. For production, use object storage (S3/Cloudinary) and validate uploaded files.
-- Review tax, consumer-protection, privacy, return/refund, and seller policies for your jurisdiction.
+Confirm that the role values and database schema match your implementation before running this query.
+
+## Production Considerations
+
+- Use strong database credentials and a secure JWT secret.
+- Enable HTTPS and restrict database access.
+- Configure CORS for the deployed frontend origin.
+- Consider email verification, password recovery, rate limiting, audit logs, backups, and monitoring.
+- The current checkout flow supports cash on delivery/demo orders; online payment integration requires a payment provider and secure server-side implementation.
+- Validate product image URLs and consider object storage for production.
+- Review applicable privacy, consumer protection, seller, return, and refund requirements.
+
