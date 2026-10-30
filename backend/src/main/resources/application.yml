@@ -5,7 +5,7 @@ spring:
   datasource:
     url: ${SPRING_DATASOURCE_URL:jdbc:mysql://mysql-241a2e3d-katarithanmai2726-8e85.l.aivencloud.com:12706/defaultdb?sslMode=REQUIRED}
     username: ${SPRING_DATASOURCE_USERNAME:avnadmin}
-    password: ${SPRING_DATASOURCE_PASSWORD:pttmspttms}
+    password: ${SPRING_DATASOURCE_PASSWORD}
 
   jpa:
     hibernate:
