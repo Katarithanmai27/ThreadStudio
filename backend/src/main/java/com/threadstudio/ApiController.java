@@ -13,10 +13,25 @@ import java.util.*;
 @RequestMapping("/api")
 class ApiController {
   private final UserRepository users; private final ProductRepository products; private final OrderRepository orders;
+  private final EmailService emailService;
   private final ReviewRepository reviews; private final PasswordEncoder encoder; private final JwtService jwt;
-  ApiController(UserRepository u,ProductRepository p,OrderRepository o,ReviewRepository r,PasswordEncoder e,JwtService j) {
-    users=u; products=p; orders=o; reviews=r; encoder=e; jwt=j;
-  }
+  ApiController(
+    UserRepository u,
+    ProductRepository p,
+    OrderRepository o,
+    ReviewRepository r,
+    PasswordEncoder e,
+    JwtService j,
+    EmailService emailService
+) {
+    users = u;
+    products = p;
+    orders = o;
+    reviews = r;
+    encoder = e;
+    jwt = j;
+    this.emailService = emailService;
+}
   record RegisterRequest(@NotBlank String name,@Email @NotBlank String email,@Size(min=8) String password,String role) {}
   record LoginRequest(@Email @NotBlank String email,@NotBlank String password) {}
   record ProductRequest(@NotBlank String title,@NotBlank String description,@Positive double price,String category,String imageUrl,String size,@Min(0) int stock) {}
@@ -97,18 +112,62 @@ class ApiController {
     p.status=ProductStatus.REJECTED; return ResponseEntity.ok(products.save(p));
   }
 
-  @PostMapping("/orders") @Transactional
-  ResponseEntity<?> checkout(@Valid @RequestBody CheckoutRequest r,Authentication a) {
-    AppUser buyer=current(a); PurchaseOrder order=new PurchaseOrder(); order.buyer=buyer; order.shippingAddress=r.shippingAddress().trim();
-    Map<Long,Long> quantities=new LinkedHashMap<>();
-    for(Long id:r.productIds()) quantities.merge(id,1L,Long::sum);
-    for(var entry:quantities.entrySet()) {
-      Product p=products.findById(entry.getKey()).orElse(null); int quantity=entry.getValue().intValue();
-      if(p==null||p.status!=ProductStatus.APPROVED||p.stock<quantity) return ResponseEntity.badRequest().body(Map.of("message","A product is unavailable or stock is insufficient"));
-      OrderItem item=new OrderItem(); item.order=order; item.product=p; item.quantity=quantity; item.unitPrice=p.price; order.items.add(item); order.total+=p.price*quantity; p.stock-=quantity;
+  @PostMapping("/orders")
+@Transactional
+ResponseEntity<?> checkout(
+        @Valid @RequestBody CheckoutRequest r,
+        Authentication a) {
+
+    AppUser buyer = current(a);
+
+    PurchaseOrder order = new PurchaseOrder();
+    order.buyer = buyer;
+    order.shippingAddress = r.shippingAddress().trim();
+
+    Map<Long, Long> quantities = new LinkedHashMap<>();
+
+    for (Long id : r.productIds()) {
+        quantities.merge(id, 1L, Long::sum);
     }
-    return ResponseEntity.ok(orders.save(order));
-  }
+
+    for (var entry : quantities.entrySet()) {
+        Product p = products.findById(entry.getKey()).orElse(null);
+        int quantity = entry.getValue().intValue();
+
+        if (p == null || p.status != ProductStatus.APPROVED
+                || p.stock < quantity) {
+            return ResponseEntity.badRequest().body(
+                Map.of("message",
+                    "A product is unavailable or stock is insufficient")
+            );
+        }
+
+        OrderItem item = new OrderItem();
+        item.order = order;
+        item.product = p;
+        item.quantity = quantity;
+        item.unitPrice = p.price;
+
+        order.items.add(item);
+        order.total += p.price * quantity;
+        p.stock -= quantity;
+    }
+
+    PurchaseOrder savedOrder = orders.save(order);
+
+    try {
+        emailService.sendOrderConfirmation(
+            buyer.email,
+            savedOrder.id,
+            savedOrder.total,
+            "Cash on Delivery"
+        );
+    } catch (Exception e) {
+        System.err.println("Order email failed: " + e.getMessage());
+    }
+
+    return ResponseEntity.ok(savedOrder);
+}
   @GetMapping("/orders") List<PurchaseOrder> myOrders(Authentication a) { return orders.findByBuyerIdOrderByCreatedAtDesc(current(a).id); }
   @GetMapping("/designer/orders") List<PurchaseOrder> designerOrders(Authentication a) { return orders.findByItemsProductDesignerIdOrderByCreatedAtDesc(current(a).id); }
   @PostMapping("/designer/orders/{id}/accept") ResponseEntity<?> acceptOrder(@PathVariable Long id,Authentication a) {

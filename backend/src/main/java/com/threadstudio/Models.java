@@ -9,6 +9,12 @@ import java.util.List;
 enum Role { USER, DESIGNER, ADMIN }
 enum ProductStatus { PENDING, APPROVED, REJECTED }
 enum OrderStatus { PLACED, ACCEPTED, SHIPPED, DELIVERED, CANCELLED }
+enum PaymentStatus {
+    PENDING,
+    PAID,
+    FAILED,
+    REFUNDED
+}
 
 @Entity @Table(name="users")
 class AppUser {
@@ -47,7 +53,14 @@ class PurchaseOrder {
   @Enumerated(EnumType.STRING) public OrderStatus status=OrderStatus.PLACED;
   @Column(nullable=false) public String shippingAddress;
   @Column(nullable=false) public String paymentMethod="CASH_ON_DELIVERY";
-  public Instant createdAt=Instant.now();
+  @Enumerated(EnumType.STRING)
+@Column(nullable=false)
+public PaymentStatus paymentStatus = PaymentStatus.PENDING;
+
+public String razorpayOrderId;
+
+public String razorpayPaymentId;
+public Instant createdAt=Instant.now();
  @JsonIgnore
 @OneToMany(mappedBy="order", cascade=CascadeType.ALL, orphanRemoval=true)
 public List<OrderItem> items = new ArrayList<>();

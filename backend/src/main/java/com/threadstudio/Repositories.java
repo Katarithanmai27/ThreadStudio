@@ -15,6 +15,7 @@ interface ProductRepository extends JpaRepository<Product,Long> {
 interface OrderRepository extends JpaRepository<PurchaseOrder,Long> {
   List<PurchaseOrder> findByBuyerIdOrderByCreatedAtDesc(Long id);
   List<PurchaseOrder> findByItemsProductDesignerIdOrderByCreatedAtDesc(Long id);
+  Optional<PurchaseOrder> findByRazorpayOrderId(String razorpayOrderId);
 }
 interface ReviewRepository extends JpaRepository<ProductReview,Long> {
   List<ProductReview> findByProductIdOrderByCreatedAtDesc(Long id);
