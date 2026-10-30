@@ -33,7 +33,7 @@ spring:
 
 app:
   jwt-secret: ${JWT_SECRET:eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJhZG1pbkBnbWFpbC5jb20iLCJyb2xlIjoiQURNSU4iLCJuYW1lIjoiYWRtaW4iLCJpYXQiOjE3OTA3NDgyODgsImV4cCI6MTc5MDgzNDY4OH0.s7PZoqYItD8lsdeTcBf8B9yUCV6zTp7Cu3bjuUGWBoZPRmBaPA3W8y67LVwvehYX}
-  cors-origins: "http://localhost:5173,http://127.0.0.1:5173"
+  cors-origins: "http://localhost:5173,http://127.0.0.1:5173,https://thread-studio-mu.vercel.app"
 
 razorpay:
   key:

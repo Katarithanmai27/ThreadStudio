@@ -71,35 +71,33 @@ class SecurityConfig {
       .addFilterBefore(jwtFilter,UsernamePasswordAuthenticationFilter.class).build();
   }
   
+
 @Bean
 CorsConfigurationSource corsConfigurationSource(
     @Value("${app.cors-origins}") String origins) {
 
-  CorsConfiguration c = new CorsConfiguration();
+    CorsConfiguration c = new CorsConfiguration();
 
-  c.setAllowedOriginPatterns(List.of(
-      "http://localhost:5173",
-      "http://127.0.0.1:5173",
-      "http://192.168.*.*:5173",
-      "http://10.*.*.*:5173"
-  ));
+    c.setAllowedOrigins(
+        java.util.Arrays.stream(origins.split(","))
+            .map(String::trim)
+            .toList()
+    );
 
-  c.setAllowedMethods(
-      List.of("GET", "POST", "PUT", "DELETE", "OPTIONS")
-  );
+    c.setAllowedMethods(List.of(
+        "GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"
+    ));
 
-  c.setAllowedHeaders(
-      List.of("Authorization", "Content-Type")
-  );
+    c.setAllowedHeaders(List.of("*"));
+    c.setAllowCredentials(true);
 
-  c.setAllowCredentials(true);
+    UrlBasedCorsConfigurationSource source =
+        new UrlBasedCorsConfigurationSource();
 
-  UrlBasedCorsConfigurationSource s =
-      new UrlBasedCorsConfigurationSource();
+    source.registerCorsConfiguration("/**", c);
 
-  s.registerCorsConfiguration("/**", c);
-
-  return s;
+    return source;
 }
+
 
 }
